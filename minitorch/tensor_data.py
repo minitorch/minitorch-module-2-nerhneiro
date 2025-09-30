@@ -64,13 +64,9 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
 
     """
     # TODO: Implement for Task 2.1.
-    # divider = 0
-    # for i in range(len(shape)):
-    #     divider += shape[i]
     for i in range(len(shape) - 1, -1, -1):
         out_index[i] = ordinal % shape[i]
         ordinal //= shape[i]
-
 
 
 def broadcast_index(
@@ -99,7 +95,6 @@ def broadcast_index(
             out_index[-i - 1] = 0
         else:
             out_index[-i - 1] = big_index[-i - 1]
-
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
@@ -132,7 +127,6 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
         else:
             shape_answer.append(sh1[i])
     return tuple(shape_answer)
-
 
 
 def strides_from_shape(shape: UserShape) -> UserStrides:
@@ -254,7 +248,6 @@ class TensorData:
         new_shape = [self.shape[i] for i in order]
         new_stride = [self.strides[i] for i in order]
         return TensorData(self._storage, tuple(new_shape), tuple(new_stride))
-
 
     def to_string(self) -> str:
         s = ""

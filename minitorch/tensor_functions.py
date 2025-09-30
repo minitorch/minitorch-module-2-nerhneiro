@@ -230,7 +230,6 @@ class Permute(Function):
         ctx.save_for_backward(permutation)
         return a._new(a._tensor.permute(*permutation))
 
-
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
         # TODO: Implement for Task 2.4.

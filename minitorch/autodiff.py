@@ -22,7 +22,9 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
     Returns:
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    values = list(vals)
+    values[arg] += epsilon
+    return (f(*values) - f(*vals)) / epsilon
 
 
 variable_count = 1
@@ -60,7 +62,21 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
     Returns:
         Non-constant Variables in topological order starting from the right.
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 1.4.
+    top_sort: List[Variable] = []
+    visited: set[Any] = set()
+
+    def dfs_route(var: Variable) -> None:
+        if var.is_constant() or var.unique_id in visited:
+            return
+        visited.add(var.unique_id)
+        for parent in var.parents:
+            if not parent.is_constant() and parent.unique_id not in visited:
+                dfs_route(parent)
+        top_sort.append(var)
+    dfs_route(variable)
+    top_sort.reverse()
+    return top_sort
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -74,7 +90,19 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
 
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 1.4.
+    top_sort = topological_sort(variable=variable)
+    var_to_deriv = {variable.unique_id : deriv}
+    for var in top_sort:
+        if var.is_leaf():
+            var.accumulate_derivative(var_to_deriv[var.unique_id])
+            continue
+        chain_step = var.chain_rule(var_to_deriv[var.unique_id])
+        for step_var, var_derivative in chain_step:
+            if step_var.unique_id not in var_to_deriv:
+                var_to_deriv[step_var.unique_id] = var_derivative
+            else:
+                var_to_deriv[step_var.unique_id] += var_derivative
 
 
 @dataclass

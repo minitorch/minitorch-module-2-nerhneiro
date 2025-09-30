@@ -269,7 +269,21 @@ def tensor_map(fn: Callable[[float], float]) -> Any:
         in_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        total_elems = 1
+        for sh in out_shape:
+            total_elems *= sh
+
+        for ind in range(total_elems):
+            in_ind = [0 for _ in range(len(in_shape))]
+            out_ind = [0 for _ in range(len(out_shape))]
+            to_index(ind, out_shape, out_ind)
+            out_position = index_to_position(out_ind, out_strides)
+            if np.array_equal(out_shape, in_shape):
+                in_position = index_to_position(out_ind, in_strides)
+            else:
+                broadcast_index(out_ind, out_shape, in_shape, in_ind)
+                in_position = index_to_position(in_ind, in_strides)
+            out[out_position] = fn(in_storage[in_position])
 
     return _map
 
@@ -319,7 +333,30 @@ def tensor_zip(fn: Callable[[float, float], float]) -> Any:
         b_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        a_ind = [0 for _ in range(len(a_shape))]
+        b_ind = [0 for _ in range(len(b_shape))]
+        out_index = [0 for _ in range(len(out_shape))]
+
+        total_elems = 1
+        for sh in out_shape:
+            total_elems *= sh
+
+        for ind in range(total_elems):
+            to_index(ind, out_shape, out_index)
+            out_position = index_to_position(out_index, out_strides)
+
+            if np.array_equal(out_shape, a_shape):
+                a_position = index_to_position(out_index, a_strides)
+            else:
+                broadcast_index(out_index, out_shape, a_shape, a_ind)
+                a_position = index_to_position(a_ind, a_strides)
+            if np.array_equal(out_shape, b_shape):
+                b_position = index_to_position(out_index, b_strides)
+            else:
+                broadcast_index(out_index, out_shape, b_shape, b_ind)
+                b_position = index_to_position(b_ind, b_strides)
+
+            out[out_position] = fn(a_storage[a_position], b_storage[b_position])
 
     return _zip
 
@@ -355,7 +392,23 @@ def tensor_reduce(fn: Callable[[float, float], float]) -> Any:
         reduce_dim: int,
     ) -> None:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        a_ind = [0 for _ in range(len(a_shape))]
+        out_ind = [0 for _ in range(len(out_shape))]
+
+        total_elems = 1
+        for sh in a_shape:
+            total_elems *= sh
+
+        for ind in range(total_elems):
+            to_index(ind, a_shape, a_ind)
+            for dim in range(len(a_shape)):
+                if dim == reduce_dim:
+                    out_ind[dim] = 0
+                else:
+                    out_ind[dim] = a_ind[dim]
+            a_position = index_to_position(a_ind, a_strides)
+            out_position = index_to_position(out_ind, out_strides)
+            out[out_position] = fn(out[out_position], a_storage[a_position])
 
     return _reduce
 
